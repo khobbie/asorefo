@@ -1,6 +1,7 @@
+# MYSQL DATABASE CONNECTION
 from connection.mysql_db import conn
-# ApiKeyRequestModel
-# from models.generate_key import ApiKeyRequestModel
+# IMPORT FASTAPI
+from fastapi import HTTPException
 # UUID
 import uuid
 # SECRET HASHING
@@ -23,11 +24,25 @@ def password_hashing(password_1):
     return password
 
 
+def if_email_already_exist(email):
+    # doin my query
+    query = "SELECT * FROM `api_consumers` WHERE email = %s LIMIT 1"
+    data = cur.execute(
+        query, (email.upper(),))
+    data = cur.fetchone()
+    if data != None:
+        raise HTTPException(status_code=200, detail={
+                            "code": '333', 'message': "User with " + email + " already exist", 'data': None})
+
+
 def create_api_consumer(user):
     x_api_key = uuid.uuid5(uuid.NAMESPACE_DNS, "kite.com")
     x_api_key = '{}'.format(x_api_key)
     x_api_secret = secrets.token_hex(6)
     password = password_hashing(user.password_1.upper())
+    # CHECK USER WITH EMAIL ALREADY EXIST IN DATABASE
+    if_email_already_exist(user.email)
+    # CALL THE CREATE CONSUMER PROCEDURE
     cur.callproc("create_api_consumer", (user.first_name.upper(), user.last_name.upper(),
                                          user.first_name.upper(), user.email.upper(), None, password.upper(), x_api_key.upper(), x_api_secret.upper()))
     conn.commit()
