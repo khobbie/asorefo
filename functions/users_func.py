@@ -1,6 +1,4 @@
 from connection.mysql_db import conn
-# ApiKeyRequestModel
-# from models.generate_key import ApiKeyRequestModel
 
 # IMPORT FASTAPI
 from fastapi import HTTPException
